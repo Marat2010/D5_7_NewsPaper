@@ -1,5 +1,6 @@
 from time import timezone
-from django.contrib.auth.mixins import LoginRequiredMixin
+
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -24,6 +25,7 @@ class PostsList(ListView):
         context['time_now'] = timezone.localtime(timezone.now())  # добавим переменную текущей даты time_now
         context['posts_count'] = Post.objects.all().count()  # добавим переменную кол-во постов
         context['form'] = PostForm()
+        context['is_not_authors'] = not self.request.user.groups.filter(name='authors').exists()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -50,8 +52,7 @@ class PostSearch(ListView):
         context['time_now'] = timezone.localtime(timezone.now())  # добавим переменную текущей даты time_now
         context['posts_count'] = Post.objects.all().count()  # добавим переменную кол-во постов всего
         context['filter'] = PostFilter(self.request.GET, queryset=self.get_queryset())
-        # print('======= context =======: ', context)
-        # context['form'] = PostForm()
+        context['is_not_authors'] = not self.request.user.groups.filter(name='authors').exists()
         return context
 
 
@@ -60,25 +61,27 @@ class PostDetailView(DetailView):
     queryset = Post.objects.all()
 
 
-class PostCreateView(CreateView):
+# class PostCreateView(LoginRequiredMixin, CreateView):
+class PostCreateView(PermissionRequiredMixin, CreateView):
     template_name = 'news/post_create.html'
     form_class = PostForm
+    permission_required = ('news.add_post',)
 
 
-class PostUpdateView(LoginRequiredMixin, UpdateView):
+class PostUpdateView(PermissionRequiredMixin, UpdateView):
     template_name = 'news/post_update.html'
     form_class = PostForm
+    permission_required = ('news.change_post',)
 
-    # метод get_object мы используем вместо queryset,
-    # чтобы получить информацию об объекте который
-    # мы собираемся редактировать
     def get_object(self, **kwargs):
         id_pk = self.kwargs.get('pk')
         return Post.objects.get(pk=id_pk)
 
 
-class PostDeleteView(DeleteView):
+class PostDeleteView(PermissionRequiredMixin, DeleteView):
     template_name = 'news/post_delete.html'
     queryset = Post.objects.all()
     success_url = reverse_lazy('news:posts')
+    permission_required = ('news.delete_post',)
+
 

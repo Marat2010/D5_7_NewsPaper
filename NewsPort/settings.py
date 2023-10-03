@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-syw_nlsvwd$se70p1v5(vk*t4+#@a6-*__@b4az$qp1k__p)jj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.0.3']
+# ALLOWED_HOSTS = ['*']
 
 # LOGIN_URL = '/sign/login/'
 LOGIN_URL = '/accounts/login/'
@@ -167,5 +168,6 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_FORMS = {'signup': 'sign.forms.BasicSignupForm'}
 
 
